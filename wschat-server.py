@@ -43,7 +43,7 @@ def get_handshake_frame(conn, addr, length=4096):
 
 
 def get_data_frame(conn, addr, length=4096):
-    frame = ''
+    frame = conn.recv(length)
     while len(frame) > 2 and payload_length(frame) + payload_data_start(frame) < len(frame):
         data = conn.recv(length)
         if not data:
@@ -55,12 +55,14 @@ def get_data_frame(conn, addr, length=4096):
 
 
 def make_data_frame_reply(reply_data):
-    frame = '0x7'
+    frame = '\x81' + '\x05' + 'hello'
+    data_frame_info(frame)
+    return bytes(frame)
 
 
 def mask_key(data_frame):
     if ord(data_frame[1]) & 0x80 == 0:
-        return
+        return None
     plen = ord(data_frame[1]) & 0x7f
     if plen < 126:
         return bytes(data_frame[2:6])
@@ -88,21 +90,22 @@ def payload_data_start(data_frame):
         start = 4
     if plen == 127:
         start = 10
-    if mask_key:
+    if mask_key(data_frame) is not None:
         return start + 4
     return start
 
 
 def is_final_frame(data_frame):
-    return ord(data_frame[1]) & 0x80 != 0
+    return ord(data_frame[0]) & 0x80 != 0
 
 
 def payload_data(data_frame):
     mask = mask_key(data_frame)
     start = payload_data_start(data_frame)
     data = bytearray(data_frame[start:start + payload_length(data_frame)])
-    for i in range(len(data)):
-        data[i] = chr(ord(chr(data[i])) ^ ord(mask[i % 4]))
+    if mask is not None:
+        for i in range(len(data)):
+            data[i] = chr(ord(chr(data[i])) ^ ord(mask[i % 4]))
     return bytes(data)
 
 
@@ -112,9 +115,12 @@ def data_frame_info(data_frame):
     print payload_data_start(data_frame)
     print len(data_frame)
     print is_final_frame(data_frame)
-    print mask_key(data_frame).encode('hex')
-    print len(mask_key(data_frame))
-    payload_data(data_frame)
+    if mask_key(data_frame) is not None:
+        print mask_key(data_frame).encode('hex')
+        print len(mask_key(data_frame))
+    else:
+        print 'unmasked'
+    print str(payload_data(data_frame))
 
 
 def worker_handler(conn, addr):
@@ -122,7 +128,8 @@ def worker_handler(conn, addr):
         frame = get_handshake_frame(conn, addr, 4096)
         conn.send(accept_handshake(frame))
         frame = get_data_frame(conn, addr, 4096)
-        print str(payload_data(frame))
+        data_frame_info(frame)
+        conn.send(make_data_frame_reply(frame))
     finally:
         conn.close()
 
