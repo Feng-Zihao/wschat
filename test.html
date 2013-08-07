@@ -10,8 +10,9 @@ function WebSocketTest() {
       alert("Message is sent...");
     };
     ws.onmessage = function (evt) { 
-      var received_msg = evt.data;
       alert("Message is received...");
+      var received_msg = evt.data;
+      alert("received : " + received_msg);
     };
     ws.onclose = function() { 
       alert("Connection is closed..."); 

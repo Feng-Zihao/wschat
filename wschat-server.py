@@ -24,7 +24,7 @@ def accept_handshake(handshake_frame):
         'Upgrade: websocket\r\n' +
         'Connection: Upgrade\r\n' +
         'Sec-WebSocket-Accept: {accept_token}\r\n' +
-        '\r\n\r\n')
+        '\r\n')
     print handshake_frame
     key = re.findall('Sec-WebSocket-Key: [0-9a-zA-Z/=+]+\r\n', handshake_frame)[0].split(':')[1].strip()
     key += MAGIC_UUID
@@ -44,7 +44,7 @@ def get_handshake_frame(conn, addr, length=4096):
 
 def get_data_frame(conn, addr, length=4096):
     frame = conn.recv(length)
-    while len(frame) > 2 and payload_length(frame) + payload_data_start(frame) < len(frame):
+    while payload_length(frame) + payload_data_start(frame) < len(frame):
         data = conn.recv(length)
         if not data:
             raise DataFrameError
@@ -129,7 +129,9 @@ def worker_handler(conn, addr):
         conn.send(accept_handshake(frame))
         frame = get_data_frame(conn, addr, 4096)
         data_frame_info(frame)
-        conn.send(make_data_frame_reply(frame))
+        for i in range(5):
+            conn.send(make_data_frame_reply(frame))
+        frame = get_data_frame(conn, addr, 4096)
     finally:
         conn.close()
 
