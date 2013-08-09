@@ -1,32 +1,38 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-<script type="text/javascript">
+<link rel="stylesheet" type="text/css" href="css/channel.css">
+<script type='text/javascript'>
 function WebSocketTest() {
-  if ("WebSocket" in window)  {
-    var ws = new WebSocket("ws://localhost:50000");
+  if ('WebSocket' in window)  {
+    var ws = new WebSocket('ws://localhost:50000');
     ws.onopen = function() {
-      ws.send("Message to send");
-      alert("Message is sent...");
+      ws.send('Message to send');
+      alert('Message is sent...');
     };
     ws.onmessage = function (evt) { 
-      alert("Message is received...");
+      alert('Message is received...');
       var received_msg = evt.data;
-      alert("received : " + received_msg);
+      alert('received : ' + received_msg);
     };
     ws.onclose = function() { 
-      alert("Connection is closed..."); 
+      alert('Connection is closed...'); 
     };
   }
   else {
-    alert("WebSocket NOT supported by your Browser!");
+    alert('WebSocket NOT supported by your Browser!');
   }
 }
 </script>
 </head>
 <body>
-<div id="sse">
-  <a href="javascript:WebSocketTest()">Run WebSocket</a>
+<div id='sse'>
+  <a href='javascript:WebSocketTest()'>Run WebSocket</a>
+</div>
+
+<div id='channel' class='channel-box'>
+  <div></div>
+  <div class='channel-input-box'></div>
 </div>
 </body>
-</html>
+</html/
