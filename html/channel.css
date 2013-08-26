@@ -1,0 +1,36 @@
+
+
+div.channel-box {
+  position: relative;
+  background-color: hsl(60, 70%, 80%);
+  width: 10em;
+  height: 20em;
+  max-width: 20em;
+  max-height: 40em;
+  padding: 1em;
+  resize: both;
+  overflow: auto;
+}
+
+div.channel-msg-box {
+  position: relative;
+  width: 100%;
+  height: 1em;
+  background-color: hsl(240, 80%, 90%);
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  -ms-box-sizing: border-box;
+}
+
+div.channel-input-box {
+  position: absolute;
+  bottom: 1em;
+  background-color: hsl(120, 80%, 80%);
+  width: 100%;
+  height: 1em;
+  box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  -webkit-box-sizing: content-box;
+  -ms-box-sizing: content-box;
+}

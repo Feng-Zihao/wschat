@@ -1,38 +1,22 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="css/channel.css">
-<script type='text/javascript'>
-function WebSocketTest() {
-  if ('WebSocket' in window)  {
-    var ws = new WebSocket('ws://localhost:50000');
-    ws.onopen = function() {
-      ws.send('Message to send');
-      alert('Message is sent...');
-    };
-    ws.onmessage = function (evt) { 
-      alert('Message is received...');
-      var received_msg = evt.data;
-      alert('received : ' + received_msg);
-    };
-    ws.onclose = function() { 
-      alert('Connection is closed...'); 
-    };
-  }
-  else {
-    alert('WebSocket NOT supported by your Browser!');
-  }
-}
-</script>
+<script src='channel.js'></script>
 </head>
 <body>
-<div id='sse'>
-  <a href='javascript:WebSocketTest()'>Run WebSocket</a>
+<div class='channel' id='eb63678a-5873-4b59-ab4e-7b4ee52893f0'>
+  <input type='text' class='channel-connector' placeholder='host:port/channel/id' value='localhost:50000/ch1/user1'>
+  <input type='submit' class='channel-connect-btn' value='connect'><br>
+  <input type='text' class='channel-decryptor' placeholder='decrypt code' value='aaa'><br>
+  <label>status</label><br>
+  <div>
+    <label>messages</label><br>
+  </div>
+  <input type='text'><input type='submit' class='channel-send-btn' value='send'>
 </div>
 
-<div id='channel' class='channel-box'>
-  <div class='channel-msg-box elem'>hello</div>
-  <div class='channel-input-box'>world</div>
-</div>
+<script type='text/javascript'>
+    var ch1 = new Channel('eb63678a-5873-4b59-ab4e-7b4ee52893f0');
+</script>
 </body>
 </html/
