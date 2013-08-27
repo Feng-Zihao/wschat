@@ -60,5 +60,6 @@ s.bind((HOST, PORT))
 s.listen(1)
 while 1:
     conn, addr = s.accept()
+    conn.setblocking(0)
     worker_handler(conn, addr)
 #data_frame_info(open('recv.dat', 'rb').read())

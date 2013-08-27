@@ -2,6 +2,7 @@ import re
 import sha
 import base64
 import struct
+import socket
 
 
 class HandshakeError(Exception):
@@ -33,22 +34,28 @@ def accept_handshake(handshake_frame):
 def get_handshake_frame(conn, addr, length=4096):
     frame = ''
     while not validate_handshake_frame(frame):
-        data = conn.recv(length)
-        if not data:
-            raise HandshakeError
-        frame += data
+        try:
+            data = conn.recv(length)
+            frame += data
+        except socket.error, e:
+            if e.errno == 11:
+                pass
+            else:
+                raise HandshakeError(e)
     return frame
 
 
 def get_data_frame(conn, addr, length=4096):
-    frame = conn.recv(length)
-    while payload_length(frame) + payload_data_start(frame) < len(frame):
-        data = conn.recv(length)
-        if not data:
-            raise DataFrameError
-        frame += data
-    if payload_length(frame) + payload_data_start(frame) != len(frame):
-        raise DataFrameError
+    frame = ''
+    while len(frame) < 2 or (len(frame) < payload_length(frame) + payload_data_start(frame)):
+        try:
+            data = conn.recv(length)
+            frame += data
+        except socket.error, e:
+            if e.errno == 11:
+                pass
+            else:
+                raise DataFrameError(e)
     return frame
 
 
@@ -119,5 +126,3 @@ def data_frame_info(data_frame):
     else:
         print 'unmasked'
     print str(payload_data(data_frame))
-
-
