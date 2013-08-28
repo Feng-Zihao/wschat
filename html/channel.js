@@ -27,6 +27,7 @@ Channel.prototype.connect = function() {
             console.log('Message is received...');
             var data = evt.data;
             console.log('received : ' + data);
+            alert('data');
         };
         ws.onclose = function() { 
             console.log('Connection is closed...'); 

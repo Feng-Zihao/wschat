@@ -1,55 +1,27 @@
 
 import socket
 import websocket
+from channel import Channel
 
 
-class ValidationError(Exception):
-    pass
+channels = {'ch1': Channel(None)}
 
 
-channels = {
-    'ch1': {
-        'key': 'piapiapia',
-        'users': ['user1', 'user2']}}
-
-
-def validate_handshake(frame):
-    l = frame.split('GET')[1].split('HTTP/1.1')[0].strip()[1:]
+def validate_handshake(conn, addr, handshake_frame):
+    l = handshake_frame.split('GET')[1].split('HTTP/1.1')[0].strip()[1:]
     ch = l.split('/')[0]
     user = l.split('/')[1]
+    print ch, user
     global channels
-    print ch
-    print user
-    print channels
-    try:
-        if user in channels[ch]['users']:
-            return
-        else:
-            raise ValidationError
-    except KeyError:
-        raise ValidationError
-
-
-def push(msg):
-    pass
-
-
-def error(msg):
-    pass
+    channels[ch].accept(conn, addr, user)
+    print len(channels[ch].pipes)
 
 
 def worker_handler(conn, addr):
     try:
         frame = websocket.get_handshake_frame(conn, addr, 4096)
-        print frame
-        validate_handshake(frame)
-        conn.send(websocket.accept_handshake(frame))
-        frame = websocket.get_data_frame(conn, addr, 4096)
-        for i in range(2):
-            conn.send(websocket.make_data_frame_reply(frame))
-    except ValidationError:
-        conn.close()
-    finally:
+        validate_handshake(conn, addr, frame)
+    except:
         conn.close()
 
 
@@ -62,4 +34,3 @@ while 1:
     conn, addr = s.accept()
     conn.setblocking(0)
     worker_handler(conn, addr)
-#data_frame_info(open('recv.dat', 'rb').read())

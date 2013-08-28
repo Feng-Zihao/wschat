@@ -17,6 +17,13 @@ def validate_handshake_frame(handshake_frame):
     return handshake_frame.startswith('GET') and handshake_frame.endswith('\r\n\r\n')
 
 
+def validate_data_frame(data_frame):
+    try:
+        return len(data_frame) >= payload_length(data_frame) + payload_data_start(data_frame)
+    except:
+        return false
+
+
 def accept_handshake(handshake_frame):
     MAGIC_UUID = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11'
     accept_handshake_tmpl = ('HTTP/1.1 101 Switching Protocols\r\n' +
@@ -24,7 +31,6 @@ def accept_handshake(handshake_frame):
         'Connection: Upgrade\r\n' +
         'Sec-WebSocket-Accept: {accept_token}\r\n' +
         '\r\n')
-    print handshake_frame
     key = re.findall('Sec-WebSocket-Key: [0-9a-zA-Z/=+]+\r\n', handshake_frame)[0].split(':')[1].strip()
     key += MAGIC_UUID
     accept_token = base64.standard_b64encode(sha.new(key).digest())
@@ -47,7 +53,7 @@ def get_handshake_frame(conn, addr, length=4096):
 
 def get_data_frame(conn, addr, length=4096):
     frame = ''
-    while len(frame) < 2 or (len(frame) < payload_length(frame) + payload_data_start(frame)):
+    while not validate_data_frame(frame):
         try:
             data = conn.recv(length)
             frame += data
@@ -61,7 +67,6 @@ def get_data_frame(conn, addr, length=4096):
 
 def make_data_frame_reply(reply_data):
     frame = '\x81' + '\x05' + 'hello'
-    data_frame_info(frame)
     return bytes(frame)
 
 
