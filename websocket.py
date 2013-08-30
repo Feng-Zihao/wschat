@@ -21,7 +21,7 @@ def validate_data_frame(data_frame):
     try:
         return len(data_frame) >= payload_length(data_frame) + payload_data_start(data_frame)
     except:
-        return false
+        return False
 
 
 def accept_handshake(handshake_frame):
@@ -40,32 +40,20 @@ def accept_handshake(handshake_frame):
 def get_handshake_frame(conn, addr, length=4096):
     frame = ''
     while not validate_handshake_frame(frame):
-        try:
-            data = conn.recv(length)
-            frame += data
-        except socket.error, e:
-            if e.errno == 11:
-                pass
-            else:
-                raise HandshakeError(e)
+        data = conn.recv(length)
+        frame += data
     return frame
 
 
-def get_data_frame(conn, addr, length=4096):
+def get_data_frame(conn, length=4096):
     frame = ''
     while not validate_data_frame(frame):
-        try:
-            data = conn.recv(length)
-            frame += data
-        except socket.error, e:
-            if e.errno == 11:
-                pass
-            else:
-                raise DataFrameError(e)
+        data = conn.recv(length)
+        frame += data
     return frame
 
 
-def make_data_frame_reply(reply_data):
+def reply(reply_data):
     frame = '\x81' + '\x05' + 'hello'
     return bytes(frame)
 

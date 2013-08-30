@@ -20,14 +20,13 @@ Channel.prototype.connect = function() {
         this.ws = new WebSocket('ws://' + this.connector);
         var ws = this.ws;
         ws.onopen = function() {
-            ws.send('Message to send');
+            //ws.send('Message to send');
             console.log('Message is sent...');
         };
         ws.onmessage = function (evt) { 
             console.log('Message is received...');
             var data = evt.data;
             console.log('received : ' + data);
-            alert('data');
         };
         ws.onclose = function() { 
             console.log('Connection is closed...'); 
