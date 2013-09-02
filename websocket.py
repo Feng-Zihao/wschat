@@ -50,11 +50,18 @@ def get_data_frame(conn, length=4096):
     while not validate_data_frame(frame):
         data = conn.recv(length)
         frame += data
-    return frame
+    return bytes(frame)
 
 
 def reply(reply_data):
-    frame = '\x81' + '\x05' + 'hello'
+    frame = '\x81'
+    dlen = len(reply_data)  # data length
+    if dlen < 126:
+        frame = frame + struct.pack('>b', dlen)+ bytes(reply_data)
+    elif dlen < 65536:
+        frame = frame + '\x7e' + struct.pack('>H', dlen) + bytes(reply_data)
+    else:
+        frame = frame + '\x7f' + struct.pack('>Q', dlen) + bytes(reply_data)
     return bytes(frame)
 
 

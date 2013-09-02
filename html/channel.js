@@ -3,42 +3,58 @@
 function Channel(channelId) {
     this.ws = undefined;  // web socket object
     this.channelId = channelId;
-    this.decryptor = undefined;
-    this.connector = undefined;
+
+    this.decryptorLabel = document.querySelector('#' + channelId + ' > .decryptor');
+    this.connectorLabel = document.querySelector('#' + channelId + ' > .connector');
+    this.statusLabel = document.querySelector('#' + channelId + ' > .status');
+    this.connectButton = document.querySelector('#' + channelId + ' > .connect-btn');
+    this.sendButton = document.querySelector('#' + channelId + ' > .send-btn');
 
     // bind events
     var self = this;
-    document.querySelector('#' + this.channelId + ' > .channel-connect-btn').onclick = function() {
-        self.connector = document.querySelector('#' + self.channelId + ' > .channel-connector').value;
-        self.decryptor = document.querySelector('#' + self.channelId + ' > .channel-decryptor').value;
+
+    // connect action
+    this.connectButton.onclick = function() {
         self.connect();
     };
+
+    this.sendButton.onclick = function() {
+        self.send();
+    }
 };
 
 Channel.prototype.connect = function() {
+    if (this.ws !== undefined) {
+        this.ws.close();
+    }
     if ('WebSocket' in window)  {
-        this.ws = new WebSocket('ws://' + this.connector);
+        this.ws = new WebSocket('ws://' + this.connectorLabel.value);
+        var self = this;
         var ws = this.ws;
+
         ws.onopen = function() {
-            //ws.send('Message to send');
-            console.log('Message is sent...');
+            self.connectorLabel.disabled = true;
+            self.decryptorLabel.disabled = true;
+            self.statusLabel.innerHTML= 'connected';
         };
+
         ws.onmessage = function (evt) { 
-            console.log('Message is received...');
             var data = evt.data;
             console.log('received : ' + data);
         };
+
         ws.onclose = function() { 
-            console.log('Connection is closed...'); 
+            self.connectorLabel.disabled = false;
+            self.decryptorLabel.disabled = false;
+            self.statusLabel.innerHTML = 'closed';
         };
     } else {
         console.log('WebSocket NOT supported by your Browser!');
     }
-
 };
 
 
-Channel.prototype.send = function(data) {
+Channel.prototype.send = function() {
 };
 
 //<div id='sse'>
